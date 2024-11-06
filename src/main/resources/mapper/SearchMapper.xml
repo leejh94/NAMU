@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.namu.mapper.SearchMapper">
+
+    <select id="findCompanyNames" resultType="map">
+        SELECT
+        fir_mst_sn,
+        <choose>
+            <when test="searchType == 'brand'">
+                business_mark AS name
+            </when>
+            <when test="searchType == 'company'">
+                company_name AS name
+            </when>
+        </choose>
+        FROM franchise_basic_info
+        WHERE
+        <choose>
+            <when test="searchType == 'brand'">
+                business_mark ILIKE CONCAT('%', #{searchWord}, '%')
+            </when>
+            <when test="searchType == 'company'">
+                company_name ILIKE CONCAT('%', #{searchWord}, '%')
+            </when>
+            <otherwise>
+                1 = 0
+            </otherwise>
+        </choose>
+        ORDER BY
+        CASE
+        WHEN <choose>
+        <when test="searchType == 'brand'">business_mark ILIKE CONCAT(#{searchWord}, '%')</when>
+        <when test="searchType == 'company'">company_name ILIKE CONCAT(#{searchWord}, '%')</when>
+    </choose> THEN 1
+        ELSE 2
+        END,
+        name  -- 검색어로 시작하지 않는 경우 알파벳순 정렬
+    </select>
+
+
+    <select id="findCompanyBasicInfo" resultType="Map">
+        SELECT *
+        FROM franchise_basic_info
+        WHERE fir_mst_sn = #{companyNo}
+    </select>
+
+
+    <select id="findCompanySalesInfo" resultType="map">
+        WITH MaxYear AS (
+        SELECT MAX(report_year) AS max_year
+        FROM avg_sales_by_region
+        WHERE fir_mst_sn = #{companyNo}  <!-- 고유번호로 필터링 -->
+        )
+        SELECT
+        fbi.business_mark AS name,                      <!-- 매장명 -->
+        fbi.industry AS industry,                       <!-- 업종 -->
+        (SELECT max_year FROM MaxYear) AS report_year,  <!-- 최신 연도 추가 -->
+        ROUND(AVG(asr.avg_sales * 1000 / 12))::BIGINT AS avg_monthly_sales,  <!-- 매장 평균 월매출 -->
+        ROUND(AVG(CASE WHEN industry_avg.avg_sales IS NOT NULL AND industry_avg.avg_sales > 0
+        THEN industry_avg.avg_sales * 1000 / 12
+        END))::BIGINT AS industry_avg_monthly_sales,  <!-- 업종 평균 월매출 -->
+        ROUND(AVG(asr.avg_sales_per_area * 1000 / 12))::BIGINT AS avg_monthly_sales_per_area,  <!-- 매장 1평당 월매출 -->
+        ROUND(AVG(CASE WHEN industry_avg.avg_sales_per_area IS NOT NULL AND industry_avg.avg_sales_per_area > 0
+        THEN industry_avg.avg_sales_per_area * 1000 / 12
+        END))::BIGINT AS industry_avg_monthly_sales_per_area,  <!-- 업종 1평당 월매출 -->
+        COALESCE(ffs.equity, 0) AS equity,              <!-- 자본 -->
+        COALESCE(ffs.liabilities, 0) AS liabilities     <!-- 부채 -->
+        FROM franchise_basic_info AS fbi
+        JOIN avg_sales_by_region AS asr ON fbi.fir_mst_sn = asr.fir_mst_sn
+        JOIN (
+        SELECT
+        fbi.industry,
+        AVG(CASE WHEN asr.avg_sales IS NOT NULL AND asr.avg_sales > 0 THEN asr.avg_sales END) AS avg_sales,
+        AVG(CASE WHEN asr.avg_sales_per_area IS NOT NULL AND asr.avg_sales_per_area > 0 THEN asr.avg_sales_per_area END) AS avg_sales_per_area
+        FROM franchise_basic_info AS fbi
+        JOIN avg_sales_by_region AS asr ON fbi.fir_mst_sn = asr.fir_mst_sn
+        WHERE asr.region = #{region}  <!-- 동적 필터링 -->
+        GROUP BY fbi.industry
+        ) AS industry_avg ON fbi.industry = industry_avg.industry
+        LEFT JOIN franchise_financial_status AS ffs ON fbi.fir_mst_sn = ffs.fir_mst_sn
+        AND ffs.report_year = (SELECT max_year FROM MaxYear)
+        WHERE asr.region = #{region}  <!-- 동적 필터링 -->
+        AND fbi.fir_mst_sn = #{companyNo}  <!-- 고유번호로 필터 -->
+        AND asr.report_year = (SELECT max_year FROM MaxYear)  <!-- 최신 연도 필터 -->
+        GROUP BY fbi.business_mark, fbi.industry, (SELECT max_year FROM MaxYear), ffs.equity, ffs.liabilities
+    </select>
+
+    <select id="findCompanyRegionTotalCount" resultType="map">
+        WITH MaxYear AS (
+        SELECT MAX(report_year) AS max_year
+        FROM franchise_store_status
+        WHERE fir_mst_sn = #{companyNo}  -- 원하는 고유번호로 필터링
+        )
+        SELECT
+        region AS locale,                                  -- 지역
+        ROUND(total_stores)::INTEGER AS count      -- 전체 매장 수 (정수 변환)
+<!--        ROUND(franchise_stores)::INTEGER AS franchise_stores,  &#45;&#45; 가맹점 수 (정수 변환)-->
+<!--        ROUND(direct_stores)::INTEGER AS direct_stores     &#45;&#45; 직영점 수 (정수 변환)-->
+        FROM franchise_store_status
+        WHERE report_year = (SELECT max_year FROM MaxYear)
+        AND fir_mst_sn = #{companyNo};  -- 원하는 고유번호로 필터링
+    </select>
+
+</mapper>

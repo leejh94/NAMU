@@ -1,0 +1,53 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.3.5'
+	id 'io.spring.dependency-management' version '1.1.6'
+}
+
+group = 'com.namu' // 원하는 그룹 이름
+version = '1.0.0'  // 원하는 버전 번호
+
+jar {
+	archiveBaseName.set('namu') // JAR 파일 이름을 'namu'로 설정
+	archiveVersion.set(version) // 버전은 위에서 설정한 버전을 사용
+	enabled = false // 기본 jar 태스크 비활성화
+}
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(17)
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	// Spring Web
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+
+	// MyBatis
+	implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
+
+	// PostgreSQL JDBC Driver
+	runtimeOnly 'org.postgresql:postgresql'
+
+	// Lombok
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	// JSON 라이브러리 (Jackson)
+	implementation 'com.fasterxml.jackson.core:jackson-databind'
+
+	// HikariCP (Spring Boot 2 이상에서 기본 연결 풀로 사용되지만 명시적으로 추가 가능)
+	implementation 'com.zaxxer:HikariCP'
+
+	// Test dependencies
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+	useJUnitPlatform()
+}
