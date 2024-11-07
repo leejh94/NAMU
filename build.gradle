@@ -46,6 +46,14 @@ dependencies {
 	// Test dependencies
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	implementation 'com.github.ulisesbocchio:jasypt-spring-boot-starter:3.0.4'
+
+	// JUnit 5 (Jupiter) 의존성 추가
+	testImplementation 'org.junit.jupiter:junit-jupiter:5.8.1'
+
+	// Jasypt 의존성 추가 (필요한 경우)
+	implementation 'org.jasypt:jasypt:1.9.3'
 }
 
 tasks.named('test') {
