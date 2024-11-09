@@ -47,47 +47,46 @@
         WHERE fir_mst_sn = #{companyNo}
     </select>
 
-
     <select id="findCompanySalesInfo" resultType="map">
         WITH MaxYear AS (
         SELECT MAX(report_year) AS max_year
         FROM avg_sales_by_region
-        WHERE fir_mst_sn = #{companyNo}  <!-- 고유번호로 필터링 -->
+        WHERE fir_mst_sn = #{companyNo}
         )
         SELECT
-        fbi.business_mark AS name,                      <!-- 매장명 -->
-        fbi.industry AS industry,                       <!-- 업종 -->
-        (SELECT max_year FROM MaxYear) AS report_year,  <!-- 최신 연도 추가 -->
-        ROUND(AVG(asr.avg_sales * 1000 / 12))::BIGINT AS avg_monthly_sales,  <!-- 매장 평균 월매출 -->
-        ROUND(AVG(CASE WHEN industry_avg.avg_sales IS NOT NULL AND industry_avg.avg_sales > 0
-        THEN industry_avg.avg_sales * 1000 / 12
-        END))::BIGINT AS industry_avg_monthly_sales,  <!-- 업종 평균 월매출 -->
-        ROUND(AVG(asr.avg_sales_per_area * 1000 / 12))::BIGINT AS avg_monthly_sales_per_area,  <!-- 매장 1평당 월매출 -->
-        ROUND(AVG(CASE WHEN industry_avg.avg_sales_per_area IS NOT NULL AND industry_avg.avg_sales_per_area > 0
-        THEN industry_avg.avg_sales_per_area * 1000 / 12
-        END))::BIGINT AS industry_avg_monthly_sales_per_area,  <!-- 업종 1평당 월매출 -->
-        COALESCE(ffs.equity, 0) AS equity,              <!-- 자본 -->
-        COALESCE(ffs.liabilities, 0) AS liabilities     <!-- 부채 -->
+        fbi.business_mark AS name,
+        fbi.industry AS industry,
+        (SELECT max_year FROM MaxYear) AS report_year,
+        ROUND(AVG(asr.avg_sales * 1000 / 12))::BIGINT AS avg_monthly_sales,
+        ROUND(AVG(asr.avg_sales_per_area * 1000 / 12))::BIGINT AS avg_monthly_sales_per_area,
+        COALESCE(ffs.equity, 0) AS equity,
+        COALESCE(ffs.liabilities, 0) AS liabilities
         FROM franchise_basic_info AS fbi
         JOIN avg_sales_by_region AS asr ON fbi.fir_mst_sn = asr.fir_mst_sn
-        JOIN (
-        SELECT
-        fbi.industry,
-        AVG(CASE WHEN asr.avg_sales IS NOT NULL AND asr.avg_sales > 0 THEN asr.avg_sales END) AS avg_sales,
-        AVG(CASE WHEN asr.avg_sales_per_area IS NOT NULL AND asr.avg_sales_per_area > 0 THEN asr.avg_sales_per_area END) AS avg_sales_per_area
-        FROM franchise_basic_info AS fbi
-        JOIN avg_sales_by_region AS asr ON fbi.fir_mst_sn = asr.fir_mst_sn
-        WHERE asr.region = #{region}  <!-- 동적 필터링 -->
-        GROUP BY fbi.industry
-        ) AS industry_avg ON fbi.industry = industry_avg.industry
         LEFT JOIN franchise_financial_status AS ffs ON fbi.fir_mst_sn = ffs.fir_mst_sn
         AND ffs.report_year = (SELECT max_year FROM MaxYear)
-        WHERE asr.region = #{region}  <!-- 동적 필터링 -->
-        AND fbi.fir_mst_sn = #{companyNo}  <!-- 고유번호로 필터 -->
-        AND asr.report_year = (SELECT max_year FROM MaxYear)  <!-- 최신 연도 필터 -->
+        WHERE asr.region = #{region}
+        AND fbi.fir_mst_sn = #{companyNo}
+        AND asr.report_year = (SELECT max_year FROM MaxYear)
         GROUP BY fbi.business_mark, fbi.industry, (SELECT max_year FROM MaxYear), ffs.equity, ffs.liabilities
     </select>
 
+    <select id="findIndustryAvgSalesInfo" resultType="map">
+        WITH MaxYear AS (
+        SELECT MAX(report_year) AS max_year
+        FROM avg_sales_by_region
+        )
+        SELECT
+        fbi.industry AS industry,
+        ROUND(AVG(CASE WHEN asr.avg_sales IS NOT NULL AND asr.avg_sales > 0 THEN asr.avg_sales * 1000 / 12 END))::BIGINT AS industry_avg_monthly_sales,
+        ROUND(AVG(CASE WHEN asr.avg_sales_per_area IS NOT NULL AND asr.avg_sales_per_area > 0 THEN asr.avg_sales_per_area * 1000 / 12 END))::BIGINT AS industry_avg_monthly_sales_per_area
+        FROM franchise_basic_info AS fbi
+        JOIN avg_sales_by_region AS asr ON fbi.fir_mst_sn = asr.fir_mst_sn
+        WHERE asr.report_year = (SELECT max_year FROM MaxYear)
+        AND asr.region = #{region}
+        AND fbi.industry = #{industry}
+        GROUP BY fbi.industry
+    </select>
     <select id="findCompanyRegionTotalCount" resultType="map">
         WITH MaxYear AS (
         SELECT MAX(report_year) AS max_year
