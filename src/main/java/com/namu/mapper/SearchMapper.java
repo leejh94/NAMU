@@ -37,6 +37,11 @@ public interface SearchMapper {
             @Param("companyNo") String companyNo
     );
 
-
+    // 특정 지역 업종의 매출 상위
+    List<Map<String, Object>> findTopStoresBySales(
+            @Param("region") String region,
+            @Param("industry") String industry,
+            @Param("limit") int limit
+    );
 }
 

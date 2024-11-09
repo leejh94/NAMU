@@ -40,10 +40,21 @@ public class MainController {
         return searchService.getCompanySalesInfo(companyNo, region);
     }
 
+    // 특정 매장의 지역별 매장수
     @GetMapping("/companyRegionTotalCount")
     public StatusDTO getCompanyRegionTotalCount(
             @RequestParam("companyNo") String companyNo
     ) {
         return searchService.getCompanyRegionTotalCount(companyNo);
     }
+
+    @GetMapping("/topStoresBySales")
+    public StatusDTO getTopStoresBySales(
+            @RequestParam("region") String region,
+            @RequestParam("industry") String industry,
+            @RequestParam("limit") int limit
+    ) {
+        return searchService.getTopStoresBySales(region, industry, limit);
+    }
+
 }

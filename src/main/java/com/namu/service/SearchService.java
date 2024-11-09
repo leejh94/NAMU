@@ -94,5 +94,20 @@ public class SearchService {
         return response;
     }
 
+    public StatusDTO getTopStoresBySales(String region, String industry, int limit) {
+        List<Map<String, Object>> storeList = searchMapper.findTopStoresBySales(region, industry, limit);
+
+        StatusDTO response = new StatusDTO();
+        if (storeList != null && !storeList.isEmpty()) {
+            response.setCode(200);
+            response.setMessage("매출 정보가 성공적으로 반환되었습니다.");
+            response.setData(storeList);
+        } else {
+            response.setCode(404);
+            response.setMessage("매출 정보가 없습니다.");
+            response.setData(null);
+        }
+        return response;
+    }
 
 }
