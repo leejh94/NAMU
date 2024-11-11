@@ -113,7 +113,7 @@
         fbi.industry AS industry,              -- 업종명
         ROUND(AVG(asr.avg_sales * 1000 / 12))::BIGINT AS avg_monthly_sales, -- 평균 월매출 (만원 단위)
         COALESCE(SUM(fs.total_stores), 0) AS store_count, -- 매장 수 (전체 또는 선택 지역 기준)
-        bc.total AS franchise_fee              -- 가맹 부담금
+        ROUND(bc.total * 1000)::BIGINT AS franchise_fee -- 가맹 부담금
         FROM avg_sales_by_region AS asr
         JOIN franchise_basic_info AS fbi ON asr.fir_mst_sn = fbi.fir_mst_sn
         JOIN franchise_store_status AS fs ON fbi.fir_mst_sn = fs.fir_mst_sn
