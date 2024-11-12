@@ -26,8 +26,12 @@ public class WebConfig {
 
             @Override
             public void addViewControllers(ViewControllerRegistry registry) {
-                // 기본 경로("/")로 접근할 때 index.html을 서빙
-                registry.addViewController("/").setViewName("forward:/index.html");
+                registry.addViewController("/{spring:[a-zA-Z0-9-]+}")
+                        .setViewName("forward:/index.html");
+                registry.addViewController("/**/{spring:[a-zA-Z0-9-]+}")
+                        .setViewName("forward:/index.html");
+                registry.addViewController("/{spring:[a-zA-Z0-9-]+}/**{spring:[a-zA-Z0-9-]+}")
+                        .setViewName("forward:/index.html");
             }
         };
     }
