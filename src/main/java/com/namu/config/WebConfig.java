@@ -26,13 +26,13 @@ public class WebConfig {
 
             @Override
             public void addViewControllers(ViewControllerRegistry registry) {
-                registry.addViewController("/{spring:[a-zA-Z0-9-]+}")
+                registry.addViewController("/{path1:[a-zA-Z0-9-]+}")
                         .setViewName("forward:/index.html");
-                registry.addViewController("/**")
+                registry.addViewController("/{path1:[a-zA-Z0-9-]+}/{path2:[a-zA-Z0-9-]+}")
                         .setViewName("forward:/index.html");
-                registry.addViewController("/{spring:[a-zA-Z0-9-]+}/{other:[a-zA-Z0-9-]+}")
-                        .setViewName("forward:/index.html");
+                registry.addViewController("/error").setViewName("forward:/index.html");
             }
+
 
         };
     }
