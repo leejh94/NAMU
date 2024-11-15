@@ -81,4 +81,9 @@ public class MainController {
     public StatusDTO getNewOpeningsCount() {
         return searchService.getNewOpeningsCount();
     }
+
+    @GetMapping("/franchiseFee")
+    public StatusDTO getFranchiseFee(@RequestParam("companyNo") String companyNo) {
+        return searchService.getFranchiseFee(companyNo);
+    }
 }

@@ -59,5 +59,8 @@ public interface SearchMapper {
     // 업종별 신규 개점 수 조회 메소드
     List<Map<String, Object>> findIndustryNewOpeningsCount();
 
+    // 가맹비용 조회
+    Map<String, Object> findFranchiseFeeDetails(@Param("companyNo") String companyNo);
+
 }
 

@@ -162,4 +162,22 @@ public class SearchService {
         return response;
     }
 
+    // 프랜차이즈 가맹비용
+    public StatusDTO getFranchiseFee(String companyNo) {
+        Map<String, Object> franchiseFeeData = searchMapper.findFranchiseFeeDetails(companyNo);
+        StatusDTO response = new StatusDTO();
+
+        if (franchiseFeeData != null) {
+            response.setCode(200);
+            response.setMessage("가맹 비용 정보가 성공적으로 반환되었습니다.");
+            response.setData(franchiseFeeData);
+        } else {
+            response.setCode(404);
+            response.setMessage("해당 회사의 가맹 비용 정보를 찾을 수 없습니다.");
+            response.setData(null);
+        }
+
+        return response;
+    }
+
 }

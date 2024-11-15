@@ -189,4 +189,24 @@
         ORDER BY new_openings_count DESC
     </select>
 
+    <!-- 프랜차이즈 가맹비용 -->
+    <select id="findFranchiseFeeDetails" resultType="map">
+        SELECT
+        fbi.fir_mst_sn AS store_id,                       -- 고유 번호
+        fbi.business_mark AS store_name,                  -- 매장명
+        ROUND(bc.entry_fee * 1000)::BIGINT AS entry_fee,               -- 가입비
+        ROUND(bc.education_fee * 1000)::BIGINT AS education_fee,       -- 교육비
+        ROUND(bc.deposit * 1000)::BIGINT AS deposit,                   -- 보증금
+        ROUND(bc.other_costs * 1000)::BIGINT AS other_costs,           -- 기타비용
+        ROUND(bc.total * 1000)::BIGINT AS franchise_fee,               -- 가맹 부담금 총합
+        ROUND(ic.unit_area_cost * 1000)::BIGINT AS unit_area_cost,     -- 단위면적당 인테리어 비용
+        ic.standard_store_area AS standard_store_area,                 -- 기준점포면적
+        ROUND(ic.interior_cost * 1000)::BIGINT AS interior_cost        -- 인테리어 비용
+        FROM franchise_basic_info AS fbi
+        LEFT JOIN burden_costs AS bc ON fbi.fir_mst_sn = bc.fir_mst_sn
+        LEFT JOIN interior_costs AS ic ON fbi.fir_mst_sn = ic.fir_mst_sn
+        WHERE fbi.fir_mst_sn = #{companyNo}
+        AND bc.total IS NOT NULL;
+    </select>
+
 </mapper>
