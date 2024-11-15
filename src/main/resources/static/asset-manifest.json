@@ -1,7 +1,7 @@
 {
   "files": {
-    "main.css": "/static/css/main.f3eaeada.css",
-    "main.js": "/static/js/main.ab0b3314.js",
+    "main.css": "/static/css/main.b8a9fdb8.css",
+    "main.js": "/static/js/main.eba339e1.js",
     "static/js/867.c3a0139a.chunk.js": "/static/js/867.c3a0139a.chunk.js",
     "static/js/453.96904a0b.chunk.js": "/static/js/453.96904a0b.chunk.js",
     "static/media/Maplestory Bold.ttf": "/static/media/Maplestory Bold.e39287220e971b277c0e.ttf",
@@ -15,13 +15,13 @@
     "static/media/korea-map2.svg": "/static/media/korea-map2.2415b97491853031fb9a0cc2084e2c90.svg",
     "static/media/primeicons.woff2": "/static/media/primeicons.024b32cc7bf399b1a847.woff2",
     "index.html": "/index.html",
-    "main.f3eaeada.css.map": "/static/css/main.f3eaeada.css.map",
-    "main.ab0b3314.js.map": "/static/js/main.ab0b3314.js.map",
+    "main.b8a9fdb8.css.map": "/static/css/main.b8a9fdb8.css.map",
+    "main.eba339e1.js.map": "/static/js/main.eba339e1.js.map",
     "867.c3a0139a.chunk.js.map": "/static/js/867.c3a0139a.chunk.js.map",
     "453.96904a0b.chunk.js.map": "/static/js/453.96904a0b.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.f3eaeada.css",
-    "static/js/main.ab0b3314.js"
+    "static/css/main.b8a9fdb8.css",
+    "static/js/main.eba339e1.js"
   ]
 }
