@@ -86,4 +86,11 @@ public class MainController {
     public StatusDTO getFranchiseFee(@RequestParam("companyNo") String companyNo) {
         return searchService.getFranchiseFee(companyNo);
     }
+
+    @GetMapping("/naverNewsList")
+    public StatusDTO getNaverNewsList(@RequestParam("companyNo") String companyNo,
+                                      @RequestParam("count") int count) {
+        return searchService.getNaverNewsList(companyNo, count);
+    }
+
 }
