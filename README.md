@@ -6,4 +6,4 @@
 
 
 ### front 레포지토리 및 readme 파일
-[front 소스코드](https://github.com/leejh94/NAMU_FRONT))
+([front 소스코드](https://github.com/leejh94/NAMU_FRONT))
