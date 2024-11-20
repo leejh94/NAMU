@@ -1,22 +1,29 @@
 package com.namu.auth.controller;
 
+import com.namu.auth.service.AuthService;
 import com.namu.dto.StatusDTO;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
 
-    @PostMapping("/logout")
-    public StatusDTO logout() {
-        // 로그아웃 처리
-        return new StatusDTO();
-    }
+    private final AuthService authService;
 
-    @GetMapping("/oauth/kakao")
-    public StatusDTO kakaoLogin(@RequestParam String code) {
-        // 네이버 로그인 처리
-        return new StatusDTO();
-    }
+    @PostMapping("/oauth/login")
+    public StatusDTO oauthLogin(@RequestBody Map<String, String> requestBody) {
+        String provider = requestBody.get("provider");
+        String code = requestBody.get("code");
 
+        System.out.println("로그인 호출");
+        if (provider == null || code == null) {
+            return new StatusDTO(400, "provider 또는 code가 누락되었습니다.", null);
+        }
+
+        return authService.handleLogin(provider, code);
+    }
 }

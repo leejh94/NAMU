@@ -7,7 +7,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 @EnableEncryptableProperties
-@MapperScan("com.namu.mapper")
+@MapperScan(basePackages = {
+		"com.namu.common.mapper",
+		"com.namu.auth.mapper"})
 public class DemoApplication {
 
 	public static void main(String[] args) {
