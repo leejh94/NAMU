@@ -1,4 +1,4 @@
-package com.namu.config;
+package com.namu.common.config;
 
 import org.jasypt.encryption.pbe.PooledPBEStringEncryptor;
 import org.jasypt.encryption.pbe.config.SimpleStringPBEConfig;

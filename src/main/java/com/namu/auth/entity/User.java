@@ -1,4 +1,4 @@
-package com.namu.entity;
+package com.namu.auth.entity;
 
 import lombok.Data;
 

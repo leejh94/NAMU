@@ -1,4 +1,4 @@
-package com.namu.dto;
+package com.namu.common.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

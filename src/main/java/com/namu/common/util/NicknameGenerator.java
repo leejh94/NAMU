@@ -1,4 +1,4 @@
-package com.namu.util;
+package com.namu.common.util;
 
 
 import java.util.Random;

@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.namu.stats.mapper.StatsMapper">
+
+
+    <select id="findTopStoresBySales" resultType="map">
+        WITH MaxYear AS (
+        SELECT MAX(report_year) AS max_year
+        FROM avg_sales_by_region
+        )
+        SELECT
+        fbi.fir_mst_sn AS store_id,           -- 고유 번호
+        fbi.business_mark AS store_name,       -- 매장명
+        fbi.industry AS industry,              -- 업종명
+        ROUND(AVG(asr.avg_sales * 1000 / 12))::BIGINT AS avg_monthly_sales, -- 평균 월매출 (만원 단위)
+        COALESCE(SUM(fs.total_stores), 0) AS store_count, -- 매장 수 (전체 또는 선택 지역 기준)
+        ROUND(bc.total * 1000)::BIGINT AS franchise_fee -- 가맹 부담금
+        FROM avg_sales_by_region AS asr
+        JOIN franchise_basic_info AS fbi ON asr.fir_mst_sn = fbi.fir_mst_sn
+        JOIN franchise_store_status AS fs ON fbi.fir_mst_sn = fs.fir_mst_sn
+        LEFT JOIN burden_costs AS bc ON fbi.fir_mst_sn = bc.fir_mst_sn
+        WHERE asr.avg_sales IS NOT NULL
+        AND asr.report_year = (SELECT max_year FROM MaxYear) -- 최신 연도 데이터로 필터링
+        AND fs.report_year = (SELECT max_year FROM MaxYear)  -- 최신 연도 데이터로 필터링
+        AND asr.region = #{region}                -- 유저 선택 가능 (지역)
+        AND fs.region = #{region}                 -- 유저 선택 가능 (지역, asr과 일치시켜야 함)
+        <if test="industry != '전체'">
+            AND fbi.industry = #{industry}            -- 업종 필터링 (전체가 아닐 경우에만 적용)
+        </if>
+        AND bc.total IS NOT NULL AND bc.total > 0
+        GROUP BY fbi.fir_mst_sn, fbi.business_mark, fbi.industry, bc.total
+        ORDER BY avg_monthly_sales DESC
+        LIMIT #{limit};  -- 유저 선택 가능 (조회 개수)
+    </select>
+
+
+    <select id="findIndustryAvgSaleCompanyInfos" resultType="map">
+        WITH MaxYear AS (
+        SELECT MAX(report_year) AS max_year
+        FROM avg_sales_by_region
+        )
+        SELECT
+        fbi.industry AS industry,
+        ROUND(AVG(CASE WHEN asr.avg_sales IS NOT NULL AND asr.avg_sales > 0 THEN asr.avg_sales * 1000 / 12 END))::BIGINT AS industry_avg_monthly_sales,
+        ROUND(AVG(CASE WHEN asr.avg_sales_per_area IS NOT NULL AND asr.avg_sales_per_area > 0 THEN asr.avg_sales_per_area * 1000 / 12 END))::BIGINT AS industry_avg_monthly_sales_per_area
+        FROM franchise_basic_info AS fbi
+        JOIN avg_sales_by_region AS asr ON fbi.fir_mst_sn = asr.fir_mst_sn
+        WHERE asr.report_year = (SELECT max_year FROM MaxYear)
+        AND asr.region = #{region}
+        GROUP BY fbi.industry
+        ORDER BY industry_avg_monthly_sales DESC
+    </select>
+
+    <select id="findLowestFranchiseFeeStores" resultType="map">
+        SELECT
+        fbi.fir_mst_sn AS store_id,            -- 고유 번호
+        fbi.business_mark AS store_name,       -- 매장명
+        fbi.industry AS industry,              -- 업종명
+        ROUND(AVG(asr.avg_sales * 1000 / 12))::BIGINT AS avg_monthly_sales, -- 평균 월매출 (만원 단위)
+        ROUND(bc.total * 1000)::BIGINT AS franchise_fee       -- 가맹 부담금
+        FROM burden_costs AS bc
+        JOIN franchise_basic_info AS fbi ON bc.fir_mst_sn = fbi.fir_mst_sn
+        JOIN avg_sales_by_region AS asr ON fbi.fir_mst_sn = asr.fir_mst_sn
+        WHERE bc.total IS NOT NULL
+        AND bc.total > 0
+        AND asr.avg_sales IS NOT NULL
+        AND asr.region = #{region}            -- 유저 선택 가능 (지역)
+        <if test="industry != '전체'">
+            AND fbi.industry = #{industry}    -- 유저 선택 가능 (업종, 전체일 경우 제외)
+        </if>
+        GROUP BY fbi.fir_mst_sn, fbi.business_mark, fbi.industry, bc.total
+        HAVING ROUND(AVG(asr.avg_sales * 1000 / 12))::BIGINT > 0
+        ORDER BY franchise_fee ASC
+        LIMIT #{limit};
+    </select>
+
+    <!-- 업종별 신규 개점 수 조회 -->
+    <select id="findIndustryNewOpeningsCount" resultType="map">
+        WITH MaxYear AS (
+        SELECT MAX(report_year) AS max_year
+        FROM franchise_changes
+        )
+        SELECT
+        fbi.industry AS industry,                                -- 업종명
+        COALESCE(SUM(fc.new_openings), 0) AS new_openings_count  -- 신규 개점 수
+        FROM franchise_changes AS fc
+        JOIN franchise_basic_info AS fbi ON fc.fir_mst_sn = fbi.fir_mst_sn
+        WHERE fc.report_year = (SELECT max_year FROM MaxYear)
+        GROUP BY fbi.industry
+        ORDER BY new_openings_count DESC
+    </select>
+
+
+</mapper>

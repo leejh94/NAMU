@@ -1,6 +1,6 @@
-package com.namu.exception;
+package com.namu.common.exception;
 
-import com.namu.dto.StatusDTO;
+import com.namu.common.dto.StatusDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
