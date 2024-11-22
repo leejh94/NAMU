@@ -1,6 +1,6 @@
 package com.namu.auth.mapper;
 
-import com.namu.entity.User;
+import com.namu.auth.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -11,6 +11,14 @@ import java.util.List;
  */
 @Mapper
 public interface AuthMapper {
+
+    /**
+     * 관리자 계정 및 권한 조회
+     * @param username 관리자 ID
+     * @param password 관리자 비밀번호 (해시화된 값)
+     * @return User 객체 (관리자 정보 및 권한)
+     */
+    User findAdminByUsernameAndPassword(@Param("username") String username, @Param("password") String password);
 
     /**
      * 제공자와 제공자 ID를 기준으로 사용자를 조회합니다.

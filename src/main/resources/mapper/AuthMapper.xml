@@ -5,11 +5,33 @@
 
 <mapper namespace="com.namu.auth.mapper.AuthMapper">
 
-    <!-- 사용자 조회 -->
-    <select id="findUserByProvider" parameterType="map" resultType="com.namu.entity.User">
-        SELECT * FROM users
-        WHERE provider = #{provider} AND provider_id = #{providerId}
+    <!-- 관리자 정보 및 권한 조회 -->
+    <select id="findAdminByUsernameAndPassword" parameterType="map" resultType="com.namu.auth.entity.User">
+        SELECT
+        a.admin_id AS userId,
+        a.username AS username,
+        r.authority AS role
+        FROM admins a
+        LEFT JOIN admin_role ar ON a.admin_id = ar.admin_id
+        LEFT JOIN roles r ON ar.role_id = r.role_id
+        WHERE a.username = #{username} AND a.password = #{password}
     </select>
+
+    <!-- 사용자 조회 -->
+    <select id="findUserByProvider" parameterType="map" resultType="com.namu.auth.entity.User">
+        SELECT
+        u.user_id AS userId,
+        u.username AS username,
+        u.nickname AS nickname,
+        u.provider AS provider,
+        u.provider_id AS providerId,
+        r.authority AS role
+        FROM users u
+        LEFT JOIN user_role ur ON u.user_id = ur.user_id
+        LEFT JOIN roles r ON ur.role_id = r.role_id
+        WHERE u.provider = #{provider} AND u.provider_id = #{providerId}
+    </select>
+
 
     <!-- 닉네임 중복 여부 확인 -->
     <select id="findNicknamesByPattern" parameterType="string" resultType="string">
@@ -19,7 +41,7 @@
     </select>
 
     <!-- 사용자 등록 -->
-    <insert id="registerUser" parameterType="com.namu.entity.User" useGeneratedKeys="true" keyProperty="userId">
+    <insert id="registerUser" parameterType="com.namu.auth.entity.User" useGeneratedKeys="true" keyProperty="userId">
         INSERT INTO users (username, nickname , provider, provider_id, created_at, updated_at)
         VALUES (#{username}, #{nickname} , #{provider}, #{providerId}, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     </insert>

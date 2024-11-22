@@ -2,9 +2,8 @@ package com.namu.auth.provider;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.namu.dto.StatusDTO;
-import com.namu.entity.User;
-import com.namu.util.NicknameGenerator;
+import com.namu.common.dto.StatusDTO;
+import com.namu.auth.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;

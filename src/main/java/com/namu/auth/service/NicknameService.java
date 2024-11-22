@@ -1,7 +1,7 @@
 package com.namu.auth.service;
 
 import com.namu.auth.mapper.AuthMapper;
-import com.namu.util.NicknameGenerator;
+import com.namu.common.util.NicknameGenerator;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

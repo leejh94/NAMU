@@ -2,9 +2,9 @@ package com.namu.auth.service;
 
 import com.namu.auth.mapper.AuthMapper;
 import com.namu.auth.provider.LoginProvider;
-import com.namu.dto.StatusDTO;
-import com.namu.entity.User;
-import com.namu.util.JwtTokenUtil;
+import com.namu.common.dto.StatusDTO;
+import com.namu.auth.entity.User;
+import com.namu.common.util.JwtTokenUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -63,6 +63,7 @@ public class AuthService {
             // 4-1. 기존 사용자가 없으면 신규 회원가입 처리
             authMapper.registerUser(user); // users 테이블에 사용자 정보 삽입
             authMapper.assignDefaultRole(user.getUserId()); // user_role 테이블에 기본 권한 (USER) 부여
+            user.setRole("USER");
         } else {
             // 4-2. 기존 사용자가 있으면 그 사용자 정보를 사용
             user = existingUser;
@@ -75,6 +76,33 @@ public class AuthService {
         // 사용자 정보와 함께 성공 메시지 반환
         return new StatusDTO(200, "로그인 성공", Map.of(
                 "nickname", user.getNickname(),
+                "role", user.getRole(),
+                "jwtToken", jwtToken
+        ));
+    }
+
+
+    public StatusDTO adminLogin(String username, String password) {
+        // 1. 관리자 계정 조회
+        User admin = authMapper.findAdminByUsernameAndPassword(username, password);
+
+        if (admin == null) {
+            // 아이디 또는 비밀번호가 잘못된 경우
+            return new StatusDTO(401, "아이디 또는 비밀번호가 잘못되었습니다.", null);
+        }
+
+        // 2. 권한 확인 (관리자 권한인지 확인)
+        if (!"ADMIN".equals(admin.getRole()) && !"MASTER".equals(admin.getRole())) {
+            return new StatusDTO(403, "관리자 권한이 없습니다.", null);
+        }
+
+        // 3. JWT 토큰 생성
+        String jwtToken = JwtTokenUtil.generateToken(admin.getUserId(), "ADMIN");
+
+        // 4. 성공 응답 생성
+        return new StatusDTO(200, "관리자 로그인 성공", Map.of(
+                "nickname", admin.getUsername(), // username을 nickname에 매핑
+                "role", admin.getRole(),
                 "jwtToken", jwtToken
         ));
     }

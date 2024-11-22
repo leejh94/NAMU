@@ -1,6 +1,6 @@
 package com.namu.auth.provider;
 
-import com.namu.dto.StatusDTO;
+import com.namu.common.dto.StatusDTO;
 
 public interface LoginProvider {
     /**
