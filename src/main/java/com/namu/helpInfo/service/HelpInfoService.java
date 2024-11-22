@@ -43,8 +43,6 @@ public class HelpInfoService {
 
     public StatusDTO addSiteInfo(String img, String sitelink, String title, String description) {
         try {
-            logger.info("addSiteInfo 호출됨. Title: {}, Link: {}, Description: {}", title, sitelink, description);
-            logger.debug("Base64 Image: {}", img);
 
             // 1. IMGBB 이미지 업로드 요청 준비
             RestTemplate restTemplate = new RestTemplate();

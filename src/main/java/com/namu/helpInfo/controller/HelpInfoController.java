@@ -37,9 +37,7 @@ public class HelpInfoController {
     @PostMapping("/siteAdd")
     public ResponseEntity<StatusDTO> siteAdd(@RequestBody Map<String, String> requestBody) {
 
-        logger.info("시작");
         String img = requestBody.get("img");
-        logger.info(img);
         String link = requestBody.get("link");
         String title = requestBody.get("title");
         String description = requestBody.get("description");
