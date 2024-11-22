@@ -6,6 +6,7 @@ import com.namu.helpInfo.service.HelpInfoService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -34,22 +35,16 @@ public class HelpInfoController {
 
     @RequiredRole({"ADMIN", "MASTER"}) // ADMIN, MASTER 권한만 접근 가능
     @PostMapping("/siteAdd")
-    public StatusDTO siteAdd(@RequestBody Map<String, String> requestBody) {
+    public ResponseEntity<StatusDTO> siteAdd(@RequestBody Map<String, String> requestBody) {
 
-        try{
-
-            logger.info("시작");
+        logger.info("시작");
         String img = requestBody.get("img");
-            logger.info(img);
+        logger.info(img);
         String link = requestBody.get("link");
         String title = requestBody.get("title");
         String description = requestBody.get("description");
 
-        return helpInfoService.addSiteInfo(img, link ,title, description);
-        } catch (Exception e){
-            logger.error(e.getMessage());
-        return new StatusDTO(500,"서버에러",null);
-        }
+        return ResponseEntity.ok(helpInfoService.addSiteInfo(img, link ,title, description));
 
     }
 }
