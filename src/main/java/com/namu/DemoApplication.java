@@ -10,6 +10,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @MapperScan(basePackages = {
 		"com.namu.search.mapper",
 		"com.namu.stats.mapper",
+		"com.namu.helpInfo.mapper",
 		"com.namu.auth.mapper"})
 public class DemoApplication {
 
