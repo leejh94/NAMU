@@ -6,6 +6,7 @@ import com.namu.helpInfo.mapper.HelpInfoMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -21,13 +22,15 @@ import java.util.Map;
 @Service
 public class HelpInfoService {
 
-    private static final String IMGBB_API_URL = "https://api.imgbb.com/1/upload";
-    private static final String IMGBB_API_KEY = "06948c043a9ccfd46abb2edf5ce0c025"; // IMGBB API 키
-
     private static final Logger logger = LoggerFactory.getLogger(HelpInfoService.class);
 
     @Autowired
     private HelpInfoMapper helpInfoMapper;
+
+    private static final String IMGBB_API_URL = "https://api.imgbb.com/1/upload";
+
+    @Value("${IMGBB_API_KEY}")
+    private String imgbbApiKey;
 
     public StatusDTO getInfoSiteList() {
         try {
@@ -43,10 +46,13 @@ public class HelpInfoService {
 
     public StatusDTO addSiteInfo(String img, String sitelink, String title, String description) {
         try {
+            if (imgbbApiKey == null || imgbbApiKey.isEmpty()) {
+                throw new IllegalStateException("IMGBB API 키가 설정되지 않았습니다.");
+            }
 
             // 1. IMGBB 이미지 업로드 요청 준비
             RestTemplate restTemplate = new RestTemplate();
-            String uploadUrl = IMGBB_API_URL + "?key=" + IMGBB_API_KEY;
+            String uploadUrl = IMGBB_API_URL + "?key=" + imgbbApiKey;
 
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
             body.add("image", img);
