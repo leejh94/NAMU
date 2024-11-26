@@ -88,4 +88,93 @@ public class HelpInfoService {
             return new StatusDTO(500, "사이트 정보 추가 실패: " + e.getMessage(), null);
         }
     }
+
+    /**
+     * 사이트 정보 삭제
+     * @param siteInfoId 삭제할 사이트 ID
+     * @return StatusDTO 응답 데이터
+     */
+    public StatusDTO deleteSiteInfo(int siteInfoId) {
+        try {
+            logger.info("사이트 삭제 요청: siteInfoId={}", siteInfoId);
+
+            helpInfoMapper.deleteSiteInfo(siteInfoId);
+            logger.info("사이트 삭제 완료: siteInfoId={}", siteInfoId);
+
+            return new StatusDTO(200, "사이트 삭제 성공", null);
+        } catch (Exception e) {
+            logger.error("사이트 삭제 실패: {}", e.getMessage(), e);
+            return new StatusDTO(500, "사이트 삭제 실패: " + e.getMessage(), null);
+        }
+    }
+
+    public StatusDTO saveSiteNewOrder(List<Map<String, Object>> siteOrderList) {
+        try {
+            for (Map<String, Object> item : siteOrderList) {
+                int siteInfoId = (int) item.get("siteInfoId");
+                int indexOrder = (int) item.get("indexOrder");
+
+                // 매퍼 호출
+                helpInfoMapper.updateSiteOrder(siteInfoId, indexOrder);
+                logger.info("사이트 순서 업데이트 완료: siteInfoId={}, indexOrder={}", siteInfoId, indexOrder);
+            }
+            return new StatusDTO(200, "순서가 저장되었습니다.", null);
+        } catch (Exception e) {
+            logger.error("사이트 순서 업데이트 실패: {}", e.getMessage(), e);
+            return new StatusDTO(500, "사이트 순서 업데이트 실패: " + e.getMessage(), null);
+        }
+    }
+
+    public StatusDTO updateSiteInfo(int siteInfoId, String img, String link, String title, String description) {
+        try {
+            logger.info("사이트 수정 요청: siteInfoId={}, title={}, link={}, description={}", siteInfoId, title, link, description);
+
+            String imgLink = null;
+
+            // 이미지가 Base64 형태로 전달된 경우 업로드 처리
+            if (img != null && !img.isEmpty()) {
+                if (imgbbApiKey == null || imgbbApiKey.isEmpty()) {
+                    throw new IllegalStateException("IMGBB API 키가 설정되지 않았습니다.");
+                }
+
+                // IMGBB 이미지 업로드 요청
+                RestTemplate restTemplate = new RestTemplate();
+                String uploadUrl = IMGBB_API_URL + "?key=" + imgbbApiKey;
+
+                MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+                body.add("image", img);
+
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+                HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+                logger.info("IMGBB API 호출: {}", uploadUrl);
+                ResponseEntity<Map> responseEntity = restTemplate.postForEntity(uploadUrl, requestEntity, Map.class);
+
+                Map<String, Object> response = responseEntity.getBody();
+                if (response == null || !(Boolean) response.get("success")) {
+                    logger.error("IMGBB 응답 실패: {}", response);
+                    return new StatusDTO(500, "이미지 업로드 실패", null);
+                }
+
+                // 업로드된 이미지 URL 추출
+                Map<String, Object> data = (Map<String, Object>) response.get("data");
+                imgLink = (String) data.get("url");
+                logger.info("Uploaded Image URL: {}", imgLink);
+            }
+
+            // 기존 이미지 유지 시 imgLink는 null로 전달
+            helpInfoMapper.updateSiteInfo(siteInfoId, title, description, link, imgLink);
+
+            logger.info("사이트 정보 수정 완료: siteInfoId={}", siteInfoId);
+            return new StatusDTO(200, "사이트 정보 수정 성공", null);
+        } catch (Exception e) {
+            logger.error("사이트 정보 수정 실패: {}", e.getMessage(), e);
+            return new StatusDTO(500, "사이트 정보 수정 실패: " + e.getMessage(), null);
+        }
+    }
+
+
+
 }

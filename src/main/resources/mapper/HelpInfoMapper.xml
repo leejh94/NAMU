@@ -26,5 +26,30 @@
         (SELECT COALESCE(MAX(index_order), 0) + 1 FROM support_site_info))
     </insert>
 
+    <!-- 사이트 순서 업데이트 -->
+    <update id="updateSiteOrder">
+        UPDATE support_site_info
+        SET index_order = #{indexOrder}
+        WHERE site_info_id = #{siteInfoId}
+    </update>
+
+    <!-- 사이트 정보 삭제 -->
+    <delete id="deleteSiteInfo">
+        DELETE FROM support_site_info
+        WHERE site_info_id = #{siteInfoId}
+    </delete>
+
+    <!-- 사이트 정보 수정 -->
+    <update id="updateSiteInfo">
+        UPDATE support_site_info
+        SET site_name = #{title},
+        site_description = #{description},
+        site_link = #{link},
+        img_link = CASE
+        WHEN #{imgLink, jdbcType=VARCHAR} IS NOT NULL THEN #{imgLink, jdbcType=VARCHAR}
+        ELSE img_link
+        END
+        WHERE site_info_id = #{siteInfoId}
+    </update>
 
 </mapper>

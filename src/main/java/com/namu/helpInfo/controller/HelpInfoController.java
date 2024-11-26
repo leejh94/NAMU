@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -34,8 +35,8 @@ public class HelpInfoController {
 
 
     @RequiredRole({"ADMIN", "MASTER"}) // ADMIN, MASTER 권한만 접근 가능
-    @PostMapping("/siteAdd")
-    public ResponseEntity<StatusDTO> siteAdd(@RequestBody Map<String, String> requestBody) {
+    @PostMapping("/siteInfoAdd")
+    public ResponseEntity<StatusDTO> siteInfoAdd(@RequestBody Map<String, String> requestBody) {
 
         String img = requestBody.get("img");
         String link = requestBody.get("link");
@@ -45,4 +46,50 @@ public class HelpInfoController {
         return ResponseEntity.ok(helpInfoService.addSiteInfo(img, link ,title, description));
 
     }
+
+    /**
+     * 사이트 정보 삭제 API
+     * @param siteInfoId 삭제 요청 데이터
+     * @return StatusDTO 응답 데이터
+     */
+    @RequiredRole({"ADMIN", "MASTER"}) // ADMIN, MASTER 권한만 접근 가능
+    @DeleteMapping("/deleteSiteInfo")
+    public ResponseEntity<StatusDTO> deleteSiteInfo(@RequestParam("siteInfoId") int siteInfoId) {
+        try {
+            return ResponseEntity.ok(helpInfoService.deleteSiteInfo(siteInfoId));
+        } catch (Exception e) {
+            logger.error("사이트 삭제 요청 처리 실패: {}", e.getMessage(), e);
+            return ResponseEntity.status(500).body(
+                    new StatusDTO(500, "사이트 삭제 요청 처리 실패: " + e.getMessage(), null)
+            );
+        }
+    }
+
+    @RequiredRole({"ADMIN", "MASTER"}) // ADMIN, MASTER 권한만 접근 가능
+    @PostMapping("/saveSiteNewOrder")
+    public ResponseEntity<StatusDTO> saveSiteNewOrder(@RequestBody List<Map<String, Object>> requestBody) {
+
+        return ResponseEntity.ok(helpInfoService.saveSiteNewOrder(requestBody));
+    }
+
+    @RequiredRole({"ADMIN", "MASTER"}) // ADMIN, MASTER 권한만 접근 가능
+    @PutMapping("/updateSiteInfo")
+    public ResponseEntity<StatusDTO> updateSiteInfo(@RequestBody Map<String, String> requestBody) {
+        try {
+            int siteInfoId = Integer.parseInt(requestBody.get("siteInfoId"));
+            String img = requestBody.get("img"); // Base64 이미지 (선택 사항)
+            String link = requestBody.get("link");
+            String title = requestBody.get("title");
+            String description = requestBody.get("description");
+
+            return ResponseEntity.ok(helpInfoService.updateSiteInfo(siteInfoId, img, link, title, description));
+        } catch (Exception e) {
+            logger.error("사이트 수정 요청 처리 실패: {}", e.getMessage(), e);
+            return ResponseEntity.status(500).body(
+                    new StatusDTO(500, "사이트 수정 요청 처리 실패: " + e.getMessage(), null)
+            );
+        }
+    }
+
+
 }
