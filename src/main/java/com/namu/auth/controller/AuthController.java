@@ -27,7 +27,6 @@ public class AuthController {
         return authService.handleLogin(provider, code);
     }
 
-
     @PostMapping("/admin/login")
     public StatusDTO adminLogin(@RequestBody Map<String, String> requestBody) {
         String username = requestBody.get("username");
@@ -43,6 +42,21 @@ public class AuthController {
 
 
         return authService.adminLogin(username, password);
+    }
+
+    // 권한 확인 API
+    @GetMapping("/roleCheck")
+    public StatusDTO roleCheck(@RequestHeader("Authorization") String token) {
+        try {
+            // "Bearer " 제거
+            token = token.substring(7);
+            // 토큰 검증 및 역할 추출
+            String role = authService.getRoleFromToken(token);
+            System.out.println(role);
+            return new StatusDTO(200, "권한 확인 성공", role);
+        } catch (Exception e) {
+            return new StatusDTO(401, "권한 확인 실패: " + e.getMessage(), null);
+        }
     }
 
 }

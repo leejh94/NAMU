@@ -5,6 +5,7 @@ import com.namu.auth.provider.LoginProvider;
 import com.namu.common.dto.StatusDTO;
 import com.namu.auth.entity.User;
 import com.namu.common.util.JwtTokenUtil;
+import io.jsonwebtoken.Claims;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -106,4 +107,17 @@ public class AuthService {
                 "jwtToken", jwtToken
         ));
     }
+
+    /**
+     * JWT 토큰에서 역할(role)을 추출
+     *
+     * @param token JWT 토큰
+     * @return 역할(role)
+     * @throws Exception 유효하지 않은 토큰 예외
+     */
+    public String getRoleFromToken(String token) throws Exception {
+        Claims claims = JwtTokenUtil.validateToken(token);
+        return claims.get("role", String.class);
+    }
+
 }
