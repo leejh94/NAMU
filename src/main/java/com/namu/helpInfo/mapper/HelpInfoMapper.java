@@ -1,10 +1,12 @@
 package com.namu.helpInfo.mapper;
 
 import com.namu.helpInfo.dto.SiteInfoDTO;
+import com.namu.helpInfo.dto.SupportBoardDTO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface HelpInfoMapper {
@@ -53,6 +55,27 @@ public interface HelpInfoMapper {
             @Param("link") String link,
             @Param("imgLink") String imgLink
     );
+
+    // 지원 게시글 목록 조회
+    List<SupportBoardDTO> getSupportBoardList(@Param("region") String region);
+
+    // 지원 게시글 추가
+    void insertSupportBoard(
+            @Param("title") String title,
+            @Param("link") String link,
+            @Param("region") String region
+    );
+
+    // 지원 게시글 수정
+    void updateSupportBoard(
+            @Param("supportId") int supportId,
+            @Param("title") String title,
+            @Param("link") String link,
+            @Param("region") String region
+    );
+
+    // 지원 게시글 삭제
+    void deleteSupportBoard(@Param("supportId") int supportId);
 
 
 }

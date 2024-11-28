@@ -52,4 +52,42 @@
         WHERE site_info_id = #{siteInfoId}
     </update>
 
+    <!-- 지원 게시글 목록 조회 -->
+    <select id="getSupportBoardList" parameterType="string" resultType="com.namu.helpInfo.dto.SupportBoardDTO">
+        SELECT
+        support_id AS supportId,
+        support_title AS title,
+        support_link AS link,
+        region,
+        TO_CHAR(created_at, 'YYYY-MM-DD') AS createdAt
+        FROM support_board
+        <where>
+            <if test="region != null and region != '전체'">
+                region = #{region}
+            </if>
+        </where>
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 지원 게시글 추가 -->
+    <insert id="insertSupportBoard">
+        INSERT INTO support_board (support_title, support_link, region)
+        VALUES (#{title}, #{link}, #{region})
+    </insert>
+
+    <!-- 지원 게시글 수정 -->
+    <update id="updateSupportBoard">
+        UPDATE support_board
+        SET support_title = #{title},
+        support_link = #{link},
+        region = #{region}
+        WHERE support_id = #{supportId}
+    </update>
+
+    <!-- 지원 게시글 삭제 -->
+    <delete id="deleteSupportBoard">
+        DELETE FROM support_board
+        WHERE support_id = #{supportId}
+    </delete>
+
 </mapper>

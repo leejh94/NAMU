@@ -2,6 +2,7 @@ package com.namu.helpInfo.service;
 
 import com.namu.common.dto.StatusDTO;
 import com.namu.helpInfo.dto.SiteInfoDTO;
+import com.namu.helpInfo.dto.SupportBoardDTO;
 import com.namu.helpInfo.mapper.HelpInfoMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,12 +35,11 @@ public class HelpInfoService {
 
     public StatusDTO getInfoSiteList() {
         try {
-            logger.info("getInfoSiteList 호출됨.");
             List<SiteInfoDTO> siteInfoList = helpInfoMapper.getInfoSiteList();
-            logger.info("목록 조회 성공: {}", siteInfoList);
+//            logger.info("목록 조회 성공: {}", siteInfoList);
             return new StatusDTO(200, "목록 조회 성공", siteInfoList);
         } catch (Exception e) {
-            logger.error("목록 조회 실패: {}", e.getMessage(), e);
+//            logger.error("목록 조회 실패: {}", e.getMessage(), e);
             return new StatusDTO(500, "목록 조회 실패: " + e.getMessage(), null);
         }
     }
@@ -175,6 +175,49 @@ public class HelpInfoService {
         }
     }
 
+    // 지원 게시글 목록 조회
+    public StatusDTO getSupportBoardList(String region) {
+        try {
+            List<SupportBoardDTO> boardList = helpInfoMapper.getSupportBoardList(region);
+            return new StatusDTO(200, "지원 게시글 목록 조회 성공", boardList);
+        } catch (Exception e) {
+            logger.error("지원 게시글 목록 조회 실패: {}", e.getMessage());
+            return new StatusDTO(500, "지원 게시글 목록 조회 실패: " + e.getMessage(), null);
+        }
+    }
+
+    // 지원 게시글 추가
+    public StatusDTO addSupportBoard(String title, String link, String region) {
+        try {
+            helpInfoMapper.insertSupportBoard(title, link, region);
+            return new StatusDTO(200, "지원 게시글 추가 성공", null);
+        } catch (Exception e) {
+            logger.error("지원 게시글 추가 실패: {}", e.getMessage());
+            return new StatusDTO(500, "지원 게시글 추가 실패: " + e.getMessage(), null);
+        }
+    }
+
+    // 지원 게시글 수정
+    public StatusDTO updateSupportBoard(int supportId, String title, String link, String region) {
+        try {
+            helpInfoMapper.updateSupportBoard(supportId, title, link, region);
+            return new StatusDTO(200, "지원 게시글 수정 성공", null);
+        } catch (Exception e) {
+            logger.error("지원 게시글 수정 실패: {}", e.getMessage());
+            return new StatusDTO(500, "지원 게시글 수정 실패: " + e.getMessage(), null);
+        }
+    }
+
+    // 지원 게시글 삭제
+    public StatusDTO deleteSupportBoard(int supportId) {
+        try {
+            helpInfoMapper.deleteSupportBoard(supportId);
+            return new StatusDTO(200, "지원 게시글 삭제 성공", null);
+        } catch (Exception e) {
+            logger.error("지원 게시글 삭제 실패: {}", e.getMessage());
+            return new StatusDTO(500, "지원 게시글 삭제 실패: " + e.getMessage(), null);
+        }
+    }
 
 
 }
