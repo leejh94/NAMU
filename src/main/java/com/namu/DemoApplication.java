@@ -11,7 +11,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 		"com.namu.search.mapper",
 		"com.namu.stats.mapper",
 		"com.namu.helpInfo.mapper",
-		"com.namu.auth.mapper"})
+		"com.namu.auth.mapper",
+		"com.namu.board.mapper"})
 public class DemoApplication {
 
 	public static void main(String[] args) {

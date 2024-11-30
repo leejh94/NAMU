@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.namu.board.mapper.BoardMapper">
+
+    <!-- 게시글 상세 조회용 ResultMap -->
+    <resultMap id="PostDetailMap" type="map">
+        <result property="postId" column="post_id" />
+        <result property="channelId" column="channel_id" />
+        <result property="userId" column="user_id" />
+        <result property="nickname" column="nickname" />
+        <result property="title" column="title" />
+        <result property="content" column="content" />
+        <result property="viewCount" column="view_count" />
+        <result property="recommendationCount" column="recommendation_count" />
+        <result property="createdAt" column="formatted_created_at" />
+        <result property="updatedAt" column="formatted_updated_at" />
+    </resultMap>
+
+    <!-- 게시글 목록 조회용 ResultMap -->
+    <resultMap id="PostListMap" type="map">
+        <result property="postId" column="post_id" />
+        <result property="channelId" column="channel_id" />
+        <result property="nickname" column="nickname" />
+        <result property="title" column="title" />
+        <result property="viewCount" column="view_count" />
+        <result property="recommendationCount" column="recommendation_count" />
+        <result property="commentCount" column="comment_count" />
+        <result property="createdAt" column="formatted_created_at" />
+    </resultMap>
+
+    <!-- 게시글 목록 조회 -->
+    <select id="getPostsByChannelId" resultMap="PostListMap">
+        SELECT
+        bp.post_id AS post_id,
+        bp.channel_id AS channel_id,
+        u.nickname AS nickname,
+        bp.title AS title,
+        bp.view_count AS view_count,
+        bp.recommendation_count AS recommendation_count,
+        (SELECT COUNT(*) FROM board_comments WHERE post_id = bp.post_id) AS comment_count,
+        TO_CHAR(bp.created_at, 'YYYY-MM-DD HH24:MI:SS') AS formatted_created_at
+        FROM
+        board_posts bp
+        JOIN users u ON bp.user_id = u.user_id
+        WHERE
+        bp.channel_id = #{channelId}
+        AND bp.is_public = TRUE
+        <choose>
+            <when test="sortType == 'recent'">
+                ORDER BY bp.created_at DESC, bp.post_id DESC
+            </when>
+            <when test="sortType == 'recommend_today'">
+                AND DATE(bp.created_at) = CURRENT_DATE
+                ORDER BY bp.recommendation_count DESC, bp.post_id DESC
+            </when>
+            <when test="sortType == 'recommend_week'">
+                AND DATE(bp.created_at) >= CURRENT_DATE - INTERVAL '7 days'
+                ORDER BY bp.recommendation_count DESC, bp.post_id DESC
+            </when>
+            <when test="sortType == 'recommend_month'">
+                AND DATE(bp.created_at) >= CURRENT_DATE - INTERVAL '1 month'
+                ORDER BY bp.recommendation_count DESC, bp.post_id DESC
+            </when>
+        </choose>
+        LIMIT #{limit} OFFSET #{offset}
+    </select>
+
+    <!-- 게시글 상세 조회 -->
+    <select id="getPostDetail" resultMap="PostDetailMap">
+        SELECT
+        bp.post_id AS post_id,
+        bp.channel_id AS channel_id,
+        bp.user_id AS user_id,
+        u.nickname AS nickname,
+        bp.title AS title,
+        bp.content AS content,
+        bp.view_count AS view_count,
+        bp.recommendation_count AS recommendation_count,
+        TO_CHAR(bp.created_at, 'YYYY-MM-DD HH24:MI:SS') AS formatted_created_at,
+        TO_CHAR(bp.updated_at, 'YYYY-MM-DD HH24:MI:SS') AS formatted_updated_at
+        FROM
+        board_posts bp
+        JOIN users u ON bp.user_id = u.user_id
+        WHERE
+        bp.post_id = #{postId}
+    </select>
+
+    <!-- 게시글 추가 -->
+    <insert id="insertPost">
+        INSERT INTO board_posts (user_id, channel_id, title, content)
+        VALUES (#{userId}, #{channelId}, #{title}, #{content})
+    </insert>
+
+    <!-- 게시글 수정 -->
+    <update id="updatePost">
+        UPDATE board_posts
+        SET
+        title = #{title},
+        content = #{content},
+        updated_at = CURRENT_TIMESTAMP
+        WHERE
+        post_id = #{postId}
+    </update>
+
+    <!-- 게시글 삭제 -->
+    <delete id="deletePost">
+        DELETE FROM board_posts WHERE post_id = #{postId}
+    </delete>
+
+    <!-- 게시글 추천 여부 확인 -->
+    <select id="checkIfRecommended" resultType="boolean">
+        SELECT EXISTS (
+        SELECT 1
+        FROM board_post_recommendations
+        WHERE post_id = #{postId}
+        AND user_id = #{userId}
+        )
+    </select>
+
+    <!-- 게시글 추천 추가 -->
+    <insert id="insertPostRecommendation">
+        INSERT INTO board_post_recommendations (post_id, user_id)
+        VALUES (#{postId}, #{userId})
+    </insert>
+
+    <!-- 추천수 증가 -->
+    <update id="incrementRecommendationCount">
+        UPDATE board_posts
+        SET recommendation_count = recommendation_count + 1
+        WHERE post_id = #{postId}
+    </update>
+
+</mapper>
