@@ -63,4 +63,34 @@ public class JwtTokenUtil {
                 .parseClaimsJws(token)
                 .getBody();
     }
+
+    /**
+     * HTTP 요청 헤더에서 JWT 토큰을 추출하여 userId를 반환
+     *
+     * @param token JWT 토큰
+     * @return userId
+     * @throws RuntimeException 유효하지 않은 토큰 예외
+     */
+    public static Long extractUserIdFromToken(String token) {
+        try {
+
+            if (token == null || !token.startsWith("Bearer ")) {
+                throw new IllegalArgumentException("유효하지 않은 토큰 형식입니다.");
+            }
+            token = token.substring(7); // "Bearer " 부분 제거
+            Claims claims = validateToken(token);
+
+            String userId = claims.getSubject(); // Subject에 저장된 userId를 가져옴
+            System.out.println(userId);
+            if (userId == null) {
+                throw new IllegalArgumentException("토큰에서 사용자 ID를 찾을 수 없습니다.");
+            }
+
+            return Long.parseLong(userId); // String으로 저장된 userId를 Long으로 변환
+        } catch (Exception e) {
+            throw new IllegalArgumentException("토큰에서 사용자 ID를 추출하는 중 오류 발생: " + e.getMessage(), e);
+        }
+    }
+
+
 }
