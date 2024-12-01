@@ -25,6 +25,7 @@
         <result property="channelId" column="channel_id" />
         <result property="nickname" column="nickname" />
         <result property="title" column="title" />
+        <result property="content" column="content" />
         <result property="viewCount" column="view_count" />
         <result property="recommendationCount" column="recommendation_count" />
         <result property="commentCount" column="comment_count" />
@@ -38,6 +39,7 @@
         bp.channel_id AS channel_id,
         u.nickname AS nickname,
         bp.title AS title,
+        bp.content AS content,
         bp.view_count AS view_count,
         bp.recommendation_count AS recommendation_count,
         (SELECT COUNT(*) FROM board_comments WHERE post_id = bp.post_id) AS comment_count,
