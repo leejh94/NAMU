@@ -23,7 +23,8 @@ public interface BoardMapper {
     void insertPost(@Param("userId") Long userId,
                     @Param("channelId") Long channelId,
                     @Param("title") String title,
-                    @Param("content") String content);
+                    @Param("content") String content,
+                    @Param("isAdmin") boolean isAdmin);
 
     // 게시글 수정
     void updatePost(@Param("postId") Long postId,

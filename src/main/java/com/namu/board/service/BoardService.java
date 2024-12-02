@@ -38,9 +38,9 @@ public class BoardService {
     }
 
     // 게시글 추가
-    public StatusDTO addPost(Long userId, Long channelId, String title, String content) {
+    public StatusDTO addPost(Long userId, boolean isAdmin, Long channelId, String title, String content) {
         try {
-            boardMapper.insertPost(userId, channelId, title, content);
+            boardMapper.insertPost(userId, channelId, title, content, isAdmin);
             return new StatusDTO(201, "게시글이 성공적으로 추가되었습니다.", null);
         } catch (Exception e) {
             return new StatusDTO(500, "게시글 추가 실패: " + e.getMessage(), null);

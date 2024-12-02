@@ -36,12 +36,19 @@ public class BoardController {
     @RequiredRole({"ADMIN", "MASTER", "USER", "APPROVED_USER"})
     @PostMapping("/add")
     public ResponseEntity<StatusDTO> addPost(@RequestBody Map<String, String> requestBody, HttpServletRequest request) {
-        Long userId = JwtTokenUtil.extractUserIdFromToken(request.getHeader("Authorization"));
+        String token = request.getHeader("Authorization");
+        Map<String, Object> userInfo = JwtTokenUtil.extractUserIdAndRoleFromToken(token);
+
+        logger.info(userInfo.toString());
+        Long userId = (Long) userInfo.get("userId"); // 사용자 ID
+        String role = (String) userInfo.get("role"); // 사용자 권한
+        boolean isAdmin = "ADMIN".equals(role) || "MASTER".equals(role); // 관리자인지 확인
+
         Long channelId = Long.parseLong(requestBody.get("channelId"));
         String title = requestBody.get("title");
         String content = requestBody.get("content");
 
-        StatusDTO result = boardService.addPost(userId, channelId, title, content);
+        StatusDTO result = boardService.addPost(userId, isAdmin, channelId, title, content);
         return ResponseEntity.status(result.getCode()).body(result);
     }
 
