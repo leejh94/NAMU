@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class JwtTokenUtil {
@@ -89,6 +91,36 @@ public class JwtTokenUtil {
             return Long.parseLong(userId); // String으로 저장된 userId를 Long으로 변환
         } catch (Exception e) {
             throw new IllegalArgumentException("토큰에서 사용자 ID를 추출하는 중 오류 발생: " + e.getMessage(), e);
+        }
+    }
+
+
+    public static Map<String, Object> extractUserIdAndRoleFromToken(String token) {
+        try {
+            if (token == null || !token.startsWith("Bearer ")) {
+                System.out.println("유효하지 않은 토큰 형식입니다.");
+                throw new IllegalArgumentException("유효하지 않은 토큰 형식입니다.");
+            }
+
+            token = token.substring(7); // "Bearer " 부분 제거
+            Claims claims = validateToken(token);
+
+            String userId = claims.getSubject(); // Subject에 저장된 userId를 가져옴
+            String role = claims.get("role", String.class); // Claims에서 role을 가져옴
+
+            if (userId == null || role == null) {
+                System.out.println("토큰에서 사용자 ID 또는 권한을 찾을 수 없습니다.");
+                throw new IllegalArgumentException("토큰에서 사용자 ID 또는 권한을 찾을 수 없습니다.");
+            }
+
+            Map<String, Object> userInfo = new HashMap<>();
+            userInfo.put("userId", Long.parseLong(userId)); // userId를 Long 타입으로 변환
+            userInfo.put("role", role); // 권한 추가
+
+            return userInfo; // 사용자 정보 반환
+        } catch (Exception e) {
+                System.out.println(e.getMessage());
+            throw new IllegalArgumentException("토큰에서 사용자 정보를 추출하는 중 오류 발생: " + e.getMessage(), e);
         }
     }
 
